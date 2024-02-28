@@ -1,9 +1,7 @@
 package com.hjk.usercenter.Model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
@@ -24,17 +22,17 @@ public class User implements Serializable {
     /**
      * ⽤户昵称
      */
-    private String user_name;
+    private String userName;
 
     /**
      * 账号
      */
-    private String user_account;
+    private String userAccount;
 
     /**
      * ⽤户头像
      */
-    private String avatar_url;
+    private String avatarUrl;
 
     /**
      * 性别
@@ -44,7 +42,7 @@ public class User implements Serializable {
     /**
      * 密码
      */
-    private String user_password;
+    private String userPassword;
 
     /**
      * 邮箱
@@ -54,7 +52,7 @@ public class User implements Serializable {
     /**
      * 状态 0-正常
      */
-    private Integer user_status;
+    private Integer userStatus;
 
     /**
      * 电话
@@ -64,17 +62,18 @@ public class User implements Serializable {
     /**
      * 创建时间
      */
-    private Date gmt_create;
+    private Date gmtCreate;
 
     /**
      * 更新时间
      */
-    private Date gmt_modified;
+    private Date gmtModified;
 
     /**
      * 是否删除
      */
-    private Byte is_delete;
+    @TableLogic
+    private Byte isDelete;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
