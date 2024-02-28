@@ -12,8 +12,11 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.hjk.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  *
@@ -29,10 +32,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * 盐值
      */
     private final String SALT = "hjk";
-    /**
-     * 用户登录键
-     */
-    private final String USER_LOGIN_STATE = "userLoginState";
     /**
      * 用户注册
      * @param userAccount 账户
@@ -79,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         return user.getId();
     }
-
+    //todo
     /**
      * 用户登录
      * @param userAccount 账户名
@@ -118,7 +117,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed");
             return null;
         }
-        //用户脱敏
+        User safeUser = getSafetyUser(user);
+        request.getSession().setAttribute(USER_LOGIN_STATE, safeUser);
+        return safeUser;
+    }
+
+    /**
+     * 用户脱敏
+     * @param user 未脱敏用户
+     * @return User 脱敏用户
+     */
+    @Override
+    public User getSafetyUser(User user){
         User safeUser = new User();
         safeUser.setId(user.getId());
         safeUser.setUserName(user.getUserName());
@@ -126,11 +136,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safeUser.setAvatarUrl(user.getAvatarUrl());
         safeUser.setGender(user.getGender());
         safeUser.setEmail(user.getEmail());
+        safeUser.setUserRole(user.getUserRole());
         safeUser.setUserStatus(user.getUserStatus());
         safeUser.setPhone(user.getPhone());
         safeUser.setGmtCreate(user.getGmtCreate());
-
-        request.getSession().setAttribute(USER_LOGIN_STATE, safeUser);
         return safeUser;
     }
 }
