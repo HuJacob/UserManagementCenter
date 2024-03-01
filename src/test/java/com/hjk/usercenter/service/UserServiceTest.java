@@ -36,8 +36,9 @@ class UserServiceTest {
         String userAccount = "hjk";
         String userPassword = "12345678";
         String checkPassword = "12345678";
+        String planetCode = "123456";
         long result = userService.userRegister(userAccount, userPassword,
-                checkPassword);
+                checkPassword, planetCode);
         Assertions.assertNotEquals(-1, result);
         System.out.println(result);
         Assertions.assertTrue(result > 0);

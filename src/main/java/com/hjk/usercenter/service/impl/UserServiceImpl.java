@@ -40,7 +40,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return id 用户id
      */
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
         //校验不为空
         if(StringUtils.isAllBlank(userAccount, userPassword,checkPassword)){
             return -1;
@@ -49,6 +49,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return -1;
         }
         if(userPassword.length() < 8 || checkPassword.length() < 8){
+            return -1;
+        }
+        if(planetCode.length() > 5){
             return -1;
         }
         //不包含特殊字符
@@ -67,11 +70,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(count > 0){
             return -1;
         }
+        //邀请码不能重复
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("planet_code", userAccount);
+        count = userMapper.selectCount(queryWrapper);
+        if(count > 0){
+            return -1;
+        }
+
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         //插入
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        user.setPlanetCode(planetCode);
         boolean saveResult = this.save(user);
         if(!saveResult) {
             return -1;
@@ -140,7 +152,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safeUser.setUserStatus(user.getUserStatus());
         safeUser.setPhone(user.getPhone());
         safeUser.setGmtCreate(user.getGmtCreate());
+        safeUser.setPlanetCode(user.getPlanetCode());
         return safeUser;
+    }
+
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        //移除登陆状态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
     }
 }
 
