@@ -3,7 +3,6 @@ package com.hjk.usercenter.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hjk.usercenter.Mapper.UserMapper;
 import com.hjk.usercenter.Model.User;
-import org.apache.tomcat.util.buf.UEncoder;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
