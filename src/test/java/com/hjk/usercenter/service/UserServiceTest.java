@@ -1,6 +1,9 @@
 package com.hjk.usercenter.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hjk.usercenter.Mapper.UserMapper;
 import com.hjk.usercenter.Model.User;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -42,5 +45,16 @@ class UserServiceTest {
         Assertions.assertNotEquals(-1, result);
         System.out.println(result);
         Assertions.assertTrue(result > 0);
+    }
+    @Resource
+    UserMapper userMapper;
+    @Test
+    void testDataBase() {
+        User user = new User();
+        user.setUserName("hjk");
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_name", "hjk");
+        Object userObj = userMapper.selectObjs(queryWrapper);
+        Assert.assertNotNull(userObj);
     }
 }

@@ -8,6 +8,7 @@ import com.hjk.usercenter.common.BaseResponse;
 import com.hjk.usercenter.common.ErrorCode;
 import com.hjk.usercenter.common.ResultUtils;
 import com.hjk.usercenter.constant.UserConstant;
+import com.hjk.usercenter.exception.BusinessException;
 import com.hjk.usercenter.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -34,14 +35,14 @@ public class UserController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if(userRegisterRequest == null){
-            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         String planetCode = userRegisterRequest.getPlanetCode();
         if(StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         return ResultUtils.success(result);
@@ -49,12 +50,12 @@ public class UserController {
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if(userLoginRequest == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if(StringUtils.isAnyBlank(userAccount, userPassword)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(user);
@@ -62,7 +63,7 @@ public class UserController {
     @PostMapping("/logout")
     public BaseResponse<Integer> userLogout( HttpServletRequest request) {
         if(request == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         int result = userService.userLogout(request);
         return ResultUtils.success(result);
@@ -72,19 +73,20 @@ public class UserController {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if(currentUser == null){
-            return null;
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         long userId = currentUser.getId();
         //todo 校验用户是否合法
         User user = userService.getById(userId);
-        return ResultUtils.success(user);
+        User safeUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safeUser);
     }
 
 
     @GetMapping("search")
     public BaseResponse<List<User>> searchUser(String username,HttpServletRequest request){
         if(!checkAdmin(request)){
-            return null;
+            throw new BusinessException(ErrorCode.NO_AUTH);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if(StringUtils.isNotBlank(username)){
@@ -97,14 +99,20 @@ public class UserController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request){
         if(!checkAdmin(request)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if(id <= 0){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean result = userService.removeById(id);
         return ResultUtils.success(result);
     }
+
+    /**
+     * 是否为管理员
+     * @param request
+     * @return
+     */
     private boolean checkAdmin(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User)userObj;
